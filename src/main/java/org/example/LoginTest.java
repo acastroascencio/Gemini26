@@ -1,12 +1,14 @@
 package org.example;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
+
 import java.time.Duration;
 
 public class LoginTest {
@@ -14,13 +16,24 @@ public class LoginTest {
     private WebDriver driver;
     private LoginPage loginPage;
 
-    // 1. EL PROVEEDOR DE DATOS (Nuestra pequeña base de datos)
+    // 1. Variables globales para nuestro Reporte Web
+    private static ExtentReports extent;
+    private ExtentTest test;
+
+    @BeforeClass
+    public void configurarReporte() {
+        // Le decimos cómo se llamará el archivo y lo inicializamos
+        ExtentSparkReporter spark = new ExtentSparkReporter("Reporte_QA.html");
+        extent = new ExtentReports();
+        extent.attachReporter(spark);
+    }
+
     @DataProvider(name = "usuariosDePrueba")
     public Object[][] proveerCredenciales() {
         return new Object[][] {
-                {"standard_user", "secret_sauce"}, // Fila 1: Válido (Debe PASAR)
-                {"locked_out_user", "secret_sauce"}, // Fila 2: Bloqueado (Debe FALLAR)
-                {"hacker_anonimo", "clave_falsa"}    // Fila 3: Inventado (Debe FALLAR)
+                {"standard_user", "secret_sauce"},
+                {"locked_out_user", "secret_sauce"},
+                {"hacker_anonimo", "clave_falsa"}
         };
     }
 
@@ -33,19 +46,26 @@ public class LoginTest {
         loginPage = new LoginPage(driver);
     }
 
-    // 2. CONECTAMOS EL TEST CON LOS DATOS Y AGREGAMOS PARÁMETROS
     @Test(dataProvider = "usuariosDePrueba")
     public void verificarLoginMultiplesUsuarios(String usuario, String password) {
-        System.out.println("🚀 Iniciando prueba con el usuario: " + usuario);
+        // 2. Creamos una nueva entrada en el reporte para este usuario
+        test = extent.createTest("Prueba de Login: " + usuario);
+        test.log(Status.INFO, "Navegador abierto. Intentando login con: " + usuario);
 
         loginPage.escribirUsuario(usuario);
         loginPage.escribirPassword(password);
         loginPage.hacerClicLogin();
 
-        // 3. EL ASSERT QUE ROMPERÁ A PROPÓSITO
         String urlActual = driver.getCurrentUrl();
-        Assert.assertTrue(urlActual.contains("inventory.html"),
-                "❌ ERROR: El usuario '" + usuario + "' no pudo entrar al inventario.");
+
+        // 3. Evaluamos el resultado y le avisamos al reporte
+        try {
+            Assert.assertTrue(urlActual.contains("inventory.html"), "El usuario no pudo entrar.");
+            test.log(Status.PASS, "✅ Login exitoso. Validado correctamente.");
+        } catch (AssertionError e) {
+            test.log(Status.FAIL, "❌ Fallo en el Login: " + e.getMessage());
+            Assert.fail(e.getMessage()); // Le avisamos a TestNG que la prueba falló
+        }
     }
 
     @AfterMethod
@@ -53,5 +73,11 @@ public class LoginTest {
         if (driver != null) {
             driver.quit();
         }
+    }
+
+    @AfterClass
+    public void guardarReporte() {
+        // 4. Esto es vital: Escribe físicamente el archivo HTML en tu computadora
+        extent.flush();
     }
 }

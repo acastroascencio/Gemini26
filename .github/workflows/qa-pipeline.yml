@@ -22,11 +22,15 @@ jobs:
       - name: 3. Ejecutar pruebas de TestNG con Maven
         run: mvn clean test
 
-      - name: 4. Guardar Reporte HTML (Evidencia)
+      - name: 4. Crear carpeta pública para el reporte
         if: always()
-        uses: actions/upload-artifact@v4
+        run: |
+          mkdir -p public_html
+          cp **/*.html public_html/ || echo "HTML no encontrado"
+
+      - name: 5. Publicar Dashboard en GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: Reportes-Completos
-          path: |
-            **/*.html
-            target/surefire-reports/
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public_html

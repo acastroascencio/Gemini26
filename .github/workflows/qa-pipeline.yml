@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - name: 1. Clonar el repositorio
-        uses: actions/checkout@v4 # <-- Actualizado a v4
+        uses: actions/checkout@v4
 
       - name: 2. Instalar Java 17 en la nube
-        uses: actions/setup-java@v4 # <-- Actualizado a v4
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -24,7 +24,9 @@ jobs:
 
       - name: 4. Guardar Reporte HTML (Evidencia)
         if: always()
-        uses: actions/upload-artifact@v4 # <-- ¡AQUÍ ESTABA EL ERROR! Actualizado a v4
+        uses: actions/upload-artifact@v4
         with:
-          name: Reporte-ExtentReports
-          path: Reporte_QA.htmll
+          name: Reportes-Completos
+          path: |
+            **/*.html
+            target/surefire-reports/

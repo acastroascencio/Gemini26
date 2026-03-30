@@ -25,8 +25,8 @@ jobs:
       - name: 4. Crear carpeta pública para el reporte
         if: always()
         run: |
-          mkdir -p public_html
-          cp **/*.html public_html/ || echo "HTML no encontrado"
+            mkdir -p public_html
+            cp Reporte_QA.html public_html/
 
       - name: 5. Publicar Dashboard en GitHub Pages
         if: always()

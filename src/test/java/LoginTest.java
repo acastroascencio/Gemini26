@@ -38,8 +38,12 @@ public class LoginTest {
 
     @BeforeMethod
     public void configurarNavegador() {
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
+        // Le ponemos los lentes de visión nocturna a Chrome (Modo Fantasma)
+        org.openqa.selenium.chrome.ChromeOptions options = new org.openqa.selenium.chrome.ChromeOptions();
+        options.addArguments("--headless=new"); // Corre sin abrir ventana visual
+        options.addArguments("--window-size=1920,1080"); // Le damos un tamaño de pantalla virtual
+
+        driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.get("https://www.saucedemo.com/");
         loginPage = new LoginPage(driver);
@@ -81,9 +85,11 @@ public class LoginTest {
         }
     }
 
-    @AfterClass
+    @AfterClass(alwaysRun = true)
     public void guardarReporte() {
-        // 4. Esto es vital: Escribe físicamente el archivo HTML en tu computadora
-        extent.flush();
+        // El alwaysRun garantiza que el reporte se genere sí o sí
+        if (extent != null) {
+            extent.flush();
+        }
     }
 }

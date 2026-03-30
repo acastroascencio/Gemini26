@@ -1,0 +1,30 @@
+name: Suite de Pruebas Automatizadas QA
+
+on:
+  push:
+    branches: [ "master", "main" ] # ¡El robot despierta cuando subes código a la rama principal!
+
+jobs:
+  ejecutar-pruebas:
+    runs-on: ubuntu-latest # El robot enciende una computadora con Linux
+
+    steps:
+      - name: 1. Clonar el repositorio
+        uses: actions/checkout@v3
+
+      - name: 2. Instalar Java 17 en la nube
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 3. Ejecutar pruebas de TestNG con Maven
+        run: mvn clean test
+
+      - name: 4. Guardar Reporte HTML (Evidencia)
+        if: always() # Queremos el reporte incluso si las pruebas fallan (en rojo)
+        uses: actions/upload-artifact@v3
+        with:
+          name: Reporte-ExtentReports
+          path: Reporte_QA.html

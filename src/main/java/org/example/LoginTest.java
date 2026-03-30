@@ -48,7 +48,6 @@ public class LoginTest {
 
     @Test(dataProvider = "usuariosDePrueba")
     public void verificarLoginMultiplesUsuarios(String usuario, String password) {
-        // 2. Creamos una nueva entrada en el reporte para este usuario
         test = extent.createTest("Prueba de Login: " + usuario);
         test.log(Status.INFO, "Navegador abierto. Intentando login con: " + usuario);
 
@@ -58,16 +57,24 @@ public class LoginTest {
 
         String urlActual = driver.getCurrentUrl();
 
-        // 3. Evaluamos el resultado y le avisamos al reporte
         try {
             Assert.assertTrue(urlActual.contains("inventory.html"), "El usuario no pudo entrar.");
             test.log(Status.PASS, "✅ Login exitoso. Validado correctamente.");
         } catch (AssertionError e) {
-            test.log(Status.FAIL, "❌ Fallo en el Login: " + e.getMessage());
-            Assert.fail(e.getMessage()); // Le avisamos a TestNG que la prueba falló
+            // 1. TOMAR LA FOTO: Convertimos la pantalla en código Base64
+            org.openqa.selenium.TakesScreenshot camara = (org.openqa.selenium.TakesScreenshot) driver;
+            String base64Screenshot = camara.getScreenshotAs(org.openqa.selenium.OutputType.BASE64);
+
+            // 2. ADJUNTAR AL REPORTE: Creamos la imagen en ExtentReports
+            com.aventstack.extentreports.model.Media evidencia = com.aventstack.extentreports.MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build();
+
+            // 3. REGISTRAR EL FALLO: Le pasamos el texto rojo y la foto al reporte
+            test.log(Status.FAIL, "❌ Fallo en el Login: " + e.getMessage(), evidencia);
+
+            // 4. ROMPER LA PRUEBA EN TESTNG
+            Assert.fail(e.getMessage());
         }
     }
-
     @AfterMethod
     public void cerrarNavegador() {
         if (driver != null) {

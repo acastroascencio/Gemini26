@@ -2,18 +2,18 @@ name: Suite de Pruebas Automatizadas QA
 
 on:
   push:
-    branches: [ "master", "main" ] # ¡El robot despierta cuando subes código a la rama principal!
+    branches: [ "master", "main" ]
 
 jobs:
   ejecutar-pruebas:
-    runs-on: ubuntu-latest # El robot enciende una computadora con Linux
+    runs-on: ubuntu-latest
 
     steps:
       - name: 1. Clonar el repositorio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # <-- Actualizado a v4
 
       - name: 2. Instalar Java 17 en la nube
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4 # <-- Actualizado a v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -23,8 +23,8 @@ jobs:
         run: mvn clean test
 
       - name: 4. Guardar Reporte HTML (Evidencia)
-        if: always() # Queremos el reporte incluso si las pruebas fallan (en rojo)
-        uses: actions/upload-artifact@v3
+        if: always()
+        uses: actions/upload-artifact@v4 # <-- ¡AQUÍ ESTABA EL ERROR! Actualizado a v4
         with:
           name: Reporte-ExtentReports
-          path: Reporte_QA.html
+          path: Reporte_QA.htmll

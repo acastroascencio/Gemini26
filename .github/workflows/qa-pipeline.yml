@@ -7,6 +7,8 @@ on:
 jobs:
   ejecutar-pruebas:
     runs-on: ubuntu-latest
+    env:
+      TZ: 'America/Lima' # ⏰ Aquí forzamos al servidor a usar la hora de Perú
 
     steps:
       - name: 1. Clonar el repositorio
@@ -25,8 +27,8 @@ jobs:
       - name: 4. Crear carpeta pública para el reporte
         if: always()
         run: |
-            mkdir -p public_html
-            cp Reporte_QA.html public_html/index.html
+          mkdir -p public_html
+          cp Reporte_QA.html public_html/index.html
 
       - name: 5. Publicar Dashboard en GitHub Pages
         if: always()

@@ -1,10 +1,13 @@
 package org.example;
 
 import io.restassured.RestAssured;
+import org.testng.annotations.Listeners; // <-- Importación del Listener
 import org.testng.annotations.Test;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
+// ¡Aquí conectamos la cámara de seguridad global!
+@Listeners(ExtentReportListener.class)
 public class ApiTest {
 
     @Test
